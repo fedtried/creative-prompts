@@ -2,10 +2,10 @@ import { NavLink } from 'react-router-dom'
 import { Container, Menu, MenuItem } from 'semantic-ui-react'
 import SignedOutButtons from './SignedOutButtons'
 import SignedInMenu from './SignedInMenu'
-import { useState } from 'react'
+import { useAppSelector } from '../../app/store/store'
 
 const NavBar = () => {
-  const [auth, setAuth] = useState(true)
+  const {authenticated} = useAppSelector(state => state.auth)
 
   return (
     <Menu inverted={true} fixed='top'>
@@ -14,10 +14,10 @@ const NavBar = () => {
           Creative Prompts
         </MenuItem>
 
-        {auth ?
-        <SignedInMenu setAuth={setAuth}/>
+        {authenticated ?
+        <SignedInMenu/>
         :
-        <SignedOutButtons setAuth={setAuth}/>
+        <SignedOutButtons/>
         }
 
       </Container>

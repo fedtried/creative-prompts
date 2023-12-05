@@ -1,25 +1,26 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
 import {Dropdown, DropdownItem, DropdownMenu, Image, MenuItem } from 'semantic-ui-react'
+import {  useAppSelector } from '../../app/store/store';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../app/config/firebase';
 
-type Props = {
-    setAuth: (value: boolean) => void;
-}
 
-const SignedInMenu = ({setAuth}: Props) => {
+const SignedInMenu = () => {
     const navigate = useNavigate()
+    const {currentUser} = useAppSelector(state => state.auth)
 
-    function handSignOut() {
-        setAuth(false)
+    async function handlogout() {
+        await signOut(auth)
         navigate('/')
     }
 
   return (
     <MenuItem position='right'>
         <Image avatar spaced='right' src=''/>
-        <Dropdown pointing='top left' text='Name'>
+        <Dropdown pointing='top left' text={currentUser?.email as string}>
             <DropdownMenu>
-                <DropdownItem onClick={handSignOut} text='Sign Out' icon='log out'/>
+                <DropdownItem onClick={handlogout} text='Sign Out' icon='log out'/>
             </DropdownMenu>
         </Dropdown>
     </MenuItem>
