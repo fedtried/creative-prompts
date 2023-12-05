@@ -2,12 +2,13 @@
 import ModalWrapper from '../../app/common/modals/ModalWrapper'
 import { Button, Form, Message } from 'semantic-ui-react'
 import {useForm, FieldValues} from 'react-hook-form'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { auth } from '../../app/config/firebase'
 import { useAppDispatch } from '../../app/store/store'
 import { closeModal } from '../../app/common/modals/modalSlice'
+import { signIn } from './authSlice'
 
-const LoginForm = () => {
+const RegisterForm = () => {
     const {register, handleSubmit, setError, formState: {isSubmitting, isValid, isDirty, errors}} = useForm(
         {mode: 'all'}
     )
@@ -16,7 +17,12 @@ const LoginForm = () => {
 
     async function onSubmit(data: FieldValues){
         try {
-            const result = await signInWithEmailAndPassword(auth, data.email, data.password)
+            console.log(data)
+            const userCreds = await createUserWithEmailAndPassword(auth, data.email, data.password)
+            await updateProfile(userCreds.user, {
+                displayName: data.displayName
+            })
+            dispatch(signIn(userCreds.user))
             dispatch(closeModal())
         } catch (error: any) {
             setError('root.serverError', {
@@ -27,7 +33,7 @@ const LoginForm = () => {
     }
 
   return (
-    <ModalWrapper header='Sign In'>
+    <ModalWrapper header='Register'>
         <Form onSubmit={handleSubmit(onSubmit)}>
             {errors.root && (
                 <Message negative>
@@ -36,8 +42,17 @@ const LoginForm = () => {
             )}
             <Form.Field>
                 <input
-                    defaultValue='email'
-                    placeholder='Email'
+                    defaultValue=''
+                    placeholder='Display Name'
+                    {...(register('name', { required: true, minLength: 5 }))}
+                    />
+                {errors.name && <p>Please enter a display name</p>}
+            </Form.Field>
+
+            <Form.Field>
+                <input
+                    defaultValue=''
+                    placeholder='Email Address'
                     {...(register('email', { required: true, pattern: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/ }))}
                     />
                 {errors.email && <p>Please enter a valid email</p>}
@@ -45,7 +60,7 @@ const LoginForm = () => {
 
             <Form.Field>
                 <input
-                    defaultValue='password'
+                    defaultValue=''
                     type='password'
                     placeholder='Password'
                     {...(register('password', { required: true }))} />
@@ -58,7 +73,7 @@ const LoginForm = () => {
                 type='submit'
                 fluid
                 size='large'
-                content='Login'
+                content='Register'
                 color='pink'
             />
         </Form>
@@ -66,4 +81,4 @@ const LoginForm = () => {
   )
 }
 
-export default LoginForm
+export default RegisterForm

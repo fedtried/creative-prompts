@@ -2,11 +2,13 @@
 import React from 'react'
 import { useAppSelector } from '../../store/store'
 import LoginForm from '../../../features/auth/LoginForm'
+import RegisterForm from '../../../features/auth/RegisterForm'
 
 const ModalManager = () => {
 
     const modalLookup = {
-        LoginForm
+        LoginForm,
+        RegisterForm
     }
 
     const {type,data,open} = useAppSelector(state => state.modals)
