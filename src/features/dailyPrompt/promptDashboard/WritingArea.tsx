@@ -5,6 +5,7 @@ import { createId } from '@paralleldrive/cuid2'
 
 const WritingArea = (props: { date: string; quote: string}) => {
   const [writing, setWriting] = useState('')
+  const [wordCount, setWordCount] = useState(0)
   const [dailyWriting, setDailyWriting] = useState<Writing>()
 
   function onSubmit(){
@@ -19,12 +20,14 @@ const WritingArea = (props: { date: string; quote: string}) => {
 
   function handleInputChange(e: ChangeEvent<HTMLTextAreaElement>){
     const {value} = e.target
+    setWordCount(value.split(' ').length)
     setWriting(value)
   }
 
   return (
     <Form>
         <TextArea rows={20} placeholder='Write your story' onChange={e => handleInputChange(e)} />
+        <p>{wordCount} words</p>
         <Button style={{marginTop:'1rem'}} type='submit' onClick={onSubmit}>Save</Button>
     </Form>
   )

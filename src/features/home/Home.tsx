@@ -15,11 +15,6 @@ const Home = () => {
       const [currentDate, setCurrentDate] = useState(getDate());
       const [quote, setQuote] = useState('')
 
-      useEffect(() => {
-        const quote = prompts[1]
-        setQuote(quote)
-      }, )
-
       return (
         <>
           <Prompt quote={quote} date={currentDate}></Prompt>

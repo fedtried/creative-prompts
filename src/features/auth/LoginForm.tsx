@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-useless-escape */
 import ModalWrapper from '../../app/common/modals/ModalWrapper'
 import { Button, Form, Message } from 'semantic-ui-react'
@@ -18,6 +19,7 @@ const LoginForm = () => {
         try {
             const result = await signInWithEmailAndPassword(auth, data.email, data.password)
             dispatch(closeModal())
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             setError('root.serverError', {
                 type:'400',
