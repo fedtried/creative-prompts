@@ -72,7 +72,6 @@ const PromptDashboard = () => {
         <Button onClick={() => dispatch(openModal({type:'LoginForm'}))} >Get Writing</Button>
       }
 
-
     </>
 
 

@@ -1,8 +1,6 @@
 import React, { ChangeEvent, useState } from 'react'
 import { Button, Form, TextArea } from 'semantic-ui-react'
-import { Writing } from '../../../app/types/writing'
-import { createId } from '@paralleldrive/cuid2'
-import { doc, setDoc, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
 import { db } from '../../../app/config/firebase'
 import { useAppSelector } from '../../../app/store/store'
 
@@ -11,28 +9,29 @@ const WritingArea = (props: { date: string; quote: string}) => {
   const [writing, setWriting] = useState('')
   const [loading, setLoading] = useState(false)
   const [wordCount, setWordCount] = useState(0)
-  const [dailyWriting, setDailyWriting] = useState<Writing>()
+  const [docId, setDocId] = useState('')
+  const writingCollectionRef = collection(db, "writing")
 
   async function onSubmit(){
     setLoading(true)
-    const user_id = currentUser?.uid ? currentUser?.uid : 'nulls'
-    setDailyWriting({
-        id: dailyWriting ? dailyWriting.id : createId(),
-        user_id: currentUser?.uid,
-        date: props.date,
-        quote: props.quote,
-        piece: writing,
-        state: dailyWriting ? "update" : "new"
-    })
-    if (dailyWriting?.state === "new"){
-      await setDoc(doc(db, "writing", user_id), dailyWriting);
-      setLoading(false)
-    } else {
-      await updateDoc(doc(db, "writing", user_id), {
-        piece: writing
-      });
+    try {
+      if(!docId){
+        const docRef = await addDoc(writingCollectionRef, {
+          user_id: currentUser?.uid,
+          date: props.date,
+          quote: props.quote,
+          piece: writing
+        });
+        setDocId(docRef.id)
+      } else {
+        await updateDoc(doc(db, "writing", docId), {
+          piece: writing
+        })
+      }
+    } catch (error) {
       setLoading(false)
     }
+    setLoading(false)
   }
 
   function handleInputChange(e: ChangeEvent<HTMLTextAreaElement>){
@@ -45,7 +44,7 @@ const WritingArea = (props: { date: string; quote: string}) => {
     <Form>
         <TextArea rows={20} placeholder='Write your story' onChange={e => handleInputChange(e)} />
         <p>{wordCount} words</p>
-        <Button loading={loading} style={{marginTop:'1rem'}} type='submit' onClick={onSubmit}>Save</Button>
+        <Button disabled={wordCount < 5} loading={loading} style={{marginTop:'1rem'}} type='submit' onClick={onSubmit} content={docId ? "Save" : "Publish"}></Button>
     </Form>
   )
 }
