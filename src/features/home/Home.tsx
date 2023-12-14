@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useState } from 'react'
 import Prompt from '../dailyPrompt/promptDashboard/Prompt';
-import prompts from '../../prompt.json'
 import { Button } from 'semantic-ui-react';
+import { useAppDispatch } from '../../app/store/store';
+import { openModal } from '../../app/common/modals/modalSlice';
 
 const Home = () => {
+  const dispatch = useAppDispatch()
 
     function getDate() {
         const today = new Date();
@@ -17,8 +20,9 @@ const Home = () => {
 
       return (
         <>
+          <h1>Unleash your creativity with daily writing prompts, fueling your imagination on a literary adventure.</h1>
           <Prompt quote={quote} date={currentDate}></Prompt>
-          <Button>Get Writing</Button>
+          <Button onClick={() => dispatch(openModal({type:'LoginForm'}))}>Get Writing</Button>
          </>
 
       )

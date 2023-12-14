@@ -8,10 +8,10 @@ const NavBar = () => {
   const {authenticated} = useAppSelector(state => state.auth)
 
   return (
-    <Menu inverted={true} fixed='top'>
+    <Menu fixed='top'>
       <Container>
-        <MenuItem header as={NavLink} to='/daily'>
-          Creative Prompts
+        <MenuItem header as={NavLink} to={authenticated ? '/daily' : '/'}>
+          Fabula
         </MenuItem>
 
         {authenticated ?

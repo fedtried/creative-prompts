@@ -7,18 +7,21 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../../app/config/firebase'
 import { useAppDispatch } from '../../app/store/store'
 import { closeModal } from '../../app/common/modals/modalSlice'
+import { useNavigate } from 'react-router-dom'
 
 const LoginForm = () => {
     const {register, handleSubmit, setError, formState: {isSubmitting, isValid, isDirty, errors}} = useForm(
         {mode: 'all'}
     )
     const dispatch = useAppDispatch()
+    const navigate = useNavigate()
 
 
     async function onSubmit(data: FieldValues){
         try {
             const result = await signInWithEmailAndPassword(auth, data.email, data.password)
             dispatch(closeModal())
+            navigate('/daily')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             setError('root.serverError', {
