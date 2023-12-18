@@ -1,24 +1,31 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-useless-escape */
 import ModalWrapper from '../../app/common/modals/ModalWrapper'
 import { Button, Form, Message } from 'semantic-ui-react'
 import {useForm, FieldValues} from 'react-hook-form'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
-import { auth } from '../../app/config/firebase'
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { auth, db } from '../../app/config/firebase'
 import { useAppDispatch } from '../../app/store/store'
 import { closeModal } from '../../app/common/modals/modalSlice'
 import { signIn } from './authSlice'
+import { collection, doc, setDoc } from 'firebase/firestore'
 
 const RegisterForm = () => {
     const {register, handleSubmit, setError, formState: {isSubmitting, isValid, isDirty, errors}} = useForm(
         {mode: 'all'}
     )
     const dispatch = useAppDispatch()
+    const userRef = collection(db, "users");
 
 
     async function onSubmit(data: FieldValues){
         try {
             console.log(data)
             const userCreds = await createUserWithEmailAndPassword(auth, data.email, data.password)
+            const uid = userCreds.user.uid;
+            await setDoc(doc(userRef, uid), {
+                id: uid,
+            })
             await updateProfile(userCreds.user, {
                 displayName: data.displayName
             })

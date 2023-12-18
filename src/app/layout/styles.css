@@ -9,6 +9,12 @@
   background-color: #dceaf3;
 }
 
+a.header.item.active{
+  font-family: 'Cookie', cursive;
+  font-size: 2rem;
+  padding: 0 1rem;
+}
+
 body{
   background-color: #F3E5DC;
   font-family: 'Mulish', sans-serif;

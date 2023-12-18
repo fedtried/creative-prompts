@@ -1,6 +1,6 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import { Button, Form, TextArea } from 'semantic-ui-react'
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from 'firebase/firestore'
 import { db } from '../../../app/config/firebase'
 import { useAppSelector } from '../../../app/store/store'
 
@@ -9,24 +9,56 @@ const WritingArea = (props: { date: string; quote: string}) => {
   const [writing, setWriting] = useState('')
   const [loading, setLoading] = useState(false)
   const [wordCount, setWordCount] = useState(0)
-  const [docId, setDocId] = useState('')
-  const writingCollectionRef = collection(db, "writing")
+
+  const fetchData = async () => {
+    if(currentUser?.uid){
+      const nameRef = doc(db, 'users', currentUser.uid, "stories", props.date)
+      const docSnap = await getDoc(nameRef)
+      if(docSnap.exists()){
+        setWriting(docSnap.data().piece)
+      }
+    }
+  }
+
+  useEffect(() => {
+    try {
+      fetchData()
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
 
   async function onSubmit(){
     setLoading(true)
     try {
-      if(!docId){
-        const docRef = await addDoc(writingCollectionRef, {
-          user_id: currentUser?.uid,
-          date: props.date,
-          quote: props.quote,
-          piece: writing
-        });
-        setDocId(docRef.id)
+      if(currentUser?.uid){
+        const q = query(
+          collection(db, 'users', currentUser.uid, 'stories'),
+          where('date', '==', props.date)
+        );
+        const querySnapshot = await getDocs(q);
+
+        const addStoryRef = collection(db, 'users', currentUser.uid, 'stories');
+        const updateStoryRef = query(
+          collection(db, 'users', currentUser.uid, 'stories'),
+          where('date', '==', props.date)
+        );
+
+        const snapshot = await getDocs(updateStoryRef);
+
+        if (querySnapshot.empty) {
+          await setDoc(doc(addStoryRef, props.date), {
+            date: props.date,
+            quote: props.quote,
+            piece: writing
+          });
       } else {
-        await updateDoc(doc(db, "writing", docId), {
-          piece: writing
-        })
+          snapshot.forEach((doc) => {
+              updateDoc(doc.ref, {
+                  piece: writing
+              });
+          });
+      }
       }
     } catch (error) {
       setLoading(false)
@@ -42,9 +74,9 @@ const WritingArea = (props: { date: string; quote: string}) => {
 
   return (
     <Form>
-        <TextArea rows={20} placeholder='Write your story' onChange={e => handleInputChange(e)} />
+        <TextArea rows={20} placeholder='Write your story' onChange={e => handleInputChange(e)} value={writing}/>
         <p>{wordCount} words</p>
-        <Button disabled={wordCount < 5} loading={loading} style={{marginTop:'1rem'}} type='submit' onClick={onSubmit} content={docId ? "Save" : "Publish"}></Button>
+        <Button disabled={wordCount < 5} loading={loading} style={{marginTop:'1rem'}} type='submit' onClick={onSubmit} content="Save"></Button>
     </Form>
   )
 }
